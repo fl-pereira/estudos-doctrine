@@ -1,24 +1,27 @@
 <?php
 
-use Estudos\Doctrine\Helper\EntityManagerFactory;
 use Estudos\Doctrine\Entity\Aluno;
+use Estudos\Doctrine\Entity\Telefone;
+use Estudos\Doctrine\Helper\EntityManagerFactory;
 
- require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
- $entityManagerFactory = new EntityManagerFactory();
- $entityManager = $entityManagerFactory->getEntityManager();
+$entityManagerFactory = new EntityManagerFactory();
+$entityManager = $entityManagerFactory->getEntityManager();
 
- $alunoRepository = $entityManager->getRepository(Aluno::class);
+$dql = "SELECT aluno FROM Estudos\\Doctrine\\Entity\\Aluno aluno WHERE aluno.id = 1 OR aluno.nome = 'Felipe Pereira' ORDER BY aluno.nome";
+$query = $entityManager->createQuery($dql);
+$alunoList = $query->getResult();
 
- /** @var  Aluno[] $alunoList */
- $alunoList = $alunoRepository->findAll();
+foreach ($alunoList as $aluno) {
+    $telefones = $aluno
+        ->getTelefones()
+        ->map(function (Telefone $telefone) {
+            return $telefone->getNumero();
+        })
+        ->toArray();
+    echo "ID: {$aluno->getId()}\nNome: {$aluno->getNome()}\n";
+    echo "Telefones: " . implode(', ', $telefones);
 
- foreach ($alunoList as $aluno) {
-     echo "ID: {$aluno->getId()}\nNome: {$aluno->getNome()}\n\n\ ";
- }
-
- $felipePereira = $alunoRepository->findOneBy([
-     'nome' => 'Felipe Pereira'
- ]);
-
- var_dump($felipePereira);
+    echo "\n\n";
+}
